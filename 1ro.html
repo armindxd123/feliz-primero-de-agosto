@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Feliz Primero de agosto amorcito!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            overflow: hidden;
+            background: radial-gradient(circle, #2b0826 0%, #0d0015 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .contenedor-mensaje {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 46, 99, 0.3);
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 2.8rem;
+            text-shadow: 0 0 15px #ff2e63, 0 0 30px #ff2e63;
+            margin-bottom: 20px;
+            animation: latido 1.2s infinite alternate ease-in-out;
+        }
+        .btn-inicio {
+            background: linear-gradient(45deg, #ff2e63, #ff0055);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 46, 99, 0.8);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-inicio:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(255, 46, 99, 1);
+        }
+        @keyframes latido {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.06); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ETIPUETA DE AUDIO LOCAL -->
+    <!-- Reemplaza "cancion.mp3" con el nombre exacto de tu archivo -->
+    <audio id="miMusica" src="musica.mp3" loop></audio>
+
+    <div class="contenedor-mensaje">
+        <h1>¡Feliz Primero de agosto! ❤️</h1>
+        <button id="btnPlay" class="btn-inicio">💖 Reproducir Música y Cascada 🎵</button>
+    </div>
+
+    <!-- Librería Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // --- CONTROL DE TU MP3 LOCAL ---
+        const audio = document.getElementById('miMusica');
+        const btnPlay = document.getElementById('btnPlay');
+
+        btnPlay.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play().then(() => {
+                    btnPlay.textContent = "⏸️ Pausar Música";
+                }).catch(error => {
+                    alert("Asegúrate de que el archivo 'cancion.mp3' está en la misma carpeta.");
+                    console.error("Error al reproducir:", error);
+                });
+            } else {
+                audio.pause();
+                btnPlay.textContent = "🎵 Reanudar Música";
+            }
+        });
+
+        // --- CASCADA DE CORAZONES (THREE.JS) ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        camera.position.z = 25;
+
+        // Luces
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        const light = new THREE.DirectionalLight(0xff2e63, 1.5);
+        light.position.set(0, 10, 10);
+        scene.add(light);
+
+        // Geometría del Corazón
+        const shape = new THREE.Shape();
+        shape.moveTo(25, 25);
+        shape.bezierCurveTo(25, 25, 20, 0, 0, 0);
+        shape.bezierCurveTo(-30, 0, -30, 35, -30, 35);
+        shape.bezierCurveTo(-30, 55, -10, 77, 25, 95);
+        shape.bezierCurveTo(60, 77, 80, 55, 80, 35);
+        shape.bezierCurveTo(80, 35, 80, 0, 50, 0);
+        shape.bezierCurveTo(35, 0, 25, 25, 25, 25);
+
+        const extrudeSettings = { depth: 8, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 2, bevelThickness: 3 };
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        geometry.center();
+
+        // Arreglo de corazones en cascada
+        const corazones = [];
+        const cantidad = 150;
+        const colores = [0xff2e63, 0xff0055, 0xff5252, 0xff75a0, 0xe91e63];
+
+        for (let i = 0; i < cantidad; i++) {
+            const material = new THREE.MeshPhongMaterial({
+                color: colores[Math.floor(Math.random() * colores.length)],
+                shininess: 90
+            });
+
+            const corazon = new THREE.Mesh(geometry, material);
+
+            corazon.position.x = (Math.random() - 0.5) * 60;
+            corazon.position.y = Math.random() * 80 - 40; 
+            corazon.position.z = (Math.random() - 0.5) * 30;
+
+            const escala = Math.random() * 0.03 + 0.015;
+            corazon.scale.set(escala, escala, escala);
+            corazon.rotation.x = Math.PI;
+
+            corazon.userData = {
+                velocidad: Math.random() * 0.25 + 0.1,
+                rotacionX: (Math.random() - 0.5) * 0.02,
+                rotacionY: (Math.random() - 0.5) * 0.02
+            };
+
+            scene.add(corazon);
+            corazones.push(corazon);
+        }
+
+        // Bucle de animación para la caída continua
+        function animate() {
+            requestAnimationFrame(animate);
+
+            corazones.forEach(c => {
+                c.position.y -= c.userData.velocidad;
+                c.rotation.x += c.userData.rotacionX;
+                c.rotation.y += c.userData.rotacionY;
+
+                if (c.position.y < -30) {
+                    c.position.y = 40;
+                    c.position.x = (Math.random() - 0.5) * 60;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
